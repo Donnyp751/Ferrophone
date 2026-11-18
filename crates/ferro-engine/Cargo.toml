@@ -1,0 +1,30 @@
+[package]
+name = "ferro-engine"
+description = "Actor wrapper over pjsua-rust; the only Ferrophone crate that touches PJSIP"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[features]
+# Tests against the maintainer's lab PBX (docs/testing.md). Needs FERROPHONE_LAB.
+lab = []
+# Tests against the containerized PBX in tests/interop. Needs FERROPHONE_INTEROP_HOST.
+interop = []
+
+[dependencies]
+pjsua-rust.workspace = true
+tokio.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+ferro-testkit.workspace = true
+tokio = { workspace = true, features = ["full"] }
+anyhow.workspace = true
+tracing-subscriber.workspace = true
+
+[lints]
+workspace = true

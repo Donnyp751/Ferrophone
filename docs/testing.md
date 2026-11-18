@@ -4,9 +4,27 @@ Ferrophone is tested at three levels. The first two are automated.
 
 | Tier | Where | PBX | Runs | What it covers |
 | --- | --- | --- | --- | --- |
-| Container | GitHub Actions and any dev box | Asterisk 22 and FreeSWITCH 1.10 in `tests/interop/` (docker compose), SIPp, netem | Every push | All *[CI]* acceptance criteria |
-| Lab | Maintainer's lab network | Two Asterisk 20.6 servers (primary + alternate), DNS SRV records, mTLS CA | On demand: `FERROPHONE_LAB=tests/lab/lab.toml cargo test --features lab -- --test-threads=1` | Real-network checks: TLS/mTLS against a real CA, SRTP, SRV failover across two servers, NAT/VPN changes, audio on real hardware |
+| Container | GitHub Actions and any Linux dev box | Asterisk 22.11 (`andrius/asterisk:22.11.0_debian-trixie`) in `tests/interop/`; FreeSWITCH, SIPp and netem join in later milestones | Every push | All *[CI]* acceptance criteria |
+| Lab | Maintainer's lab network | Two Asterisk 20.6 servers (primary + alternate), DNS SRV records, mTLS CA | On demand: see "Running the tests" | Real-network checks: TLS/mTLS against a real CA, SRTP, SRV failover across two servers, NAT/VPN changes, audio on real hardware |
 | Manual | Release checklist | FreePBX 17, 3CX v20, Kamailio 5.8, two trunk providers | Before each release | NFR-08 interop matrix |
+
+## Running the tests
+
+```sh
+scripts/build-pjproject.sh
+export PKG_CONFIG_PATH="$PWD/third_party/prefix/lib/pkgconfig"
+cargo test --workspace                                        # unit tests
+
+docker compose -f tests/interop/docker-compose.yml up -d --wait
+FERROPHONE_INTEROP_HOST=127.0.0.1 cargo test --workspace --features ferro-engine/interop
+
+FERROPHONE_LAB=tests/lab/lab.toml cargo test --workspace --features ferro-engine/lab -- --test-threads=1
+```
+
+Debugging: `FERROPHONE_PJSIP_LOG=5 RUST_LOG=info,pjsip=trace` prints every SIP message.
+
+The container PBX has extensions 1001–1008 (test secret in `tests/interop/asterisk/pjsip.conf`),
+BLF hints and voicemail on each, `*97` voicemail, `600` echo, `601` 1 kHz tone, and `**<ext>` directed pickup.
 
 ## Lab tier
 

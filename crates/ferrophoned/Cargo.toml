@@ -1,0 +1,21 @@
+[package]
+name = "ferrophoned"
+description = "Ferrophone daemon: owns the phone and serves the control API"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+ferro-core.workspace = true
+ferro-engine.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,20 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# Container test tier (docs/testing.md). Host networking keeps SIP and RTP
+# addresses simple; it needs Linux and free ports 5060 and 10000-10099.
+#
+#   docker compose -f tests/interop/docker-compose.yml up -d --wait
+#   FERROPHONE_INTEROP_HOST=127.0.0.1 cargo test --features interop
+services:
+  asterisk:
+    image: andrius/asterisk:22.11.0_debian-trixie
+    network_mode: host
+    volumes:
+      - ./asterisk/pjsip.conf:/etc/asterisk/pjsip.conf:ro
+      - ./asterisk/extensions.conf:/etc/asterisk/extensions.conf:ro
+      - ./asterisk/voicemail.conf:/etc/asterisk/voicemail.conf:ro
+      - ./asterisk/rtp.conf:/etc/asterisk/rtp.conf:ro
+    healthcheck:
+      test: ["CMD", "asterisk", "-rx", "pjsip show transports"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
