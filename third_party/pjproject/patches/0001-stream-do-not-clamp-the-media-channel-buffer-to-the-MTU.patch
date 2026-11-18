@@ -1,0 +1,59 @@
+From 89b885fd4acdebba0c9e9c4f130049e23b6fd0a1 Mon Sep 17 00:00:00 2001
+From: Donald Posterick <donny.p@live.com>
+Date: Sun, 9 Aug 2026 12:44:48 -0500
+Subject: [PATCH] stream: do not clamp the media channel buffer to the MTU
+
+create_channel clamped channel->buf_size down to PJMEDIA_MAX_MTU minus
+PJMEDIA_STREAM_RESV_PAYLOAD_LEN, on the assumption that an RTP payload
+always fits inside the MTU. That assumption does not hold for
+high-bitrate uncompressed codecs.
+
+L16 at 44.1 kHz stereo produces 1764-byte frames at its 10 ms ptime:
+
+  44100 * 2 channels * 2 bytes * 10 ms / 1000 = 1764
+
+The encoder writes into channel->buf and trusts channel->buf_size to be
+the real allocation, so once the clamp reduces it below the codec's frame
+size the encode loop walks past the end and the process segfaults. Any
+codec whose max_bps * ptime exceeds the MTU is affected.
+
+The caller has already sized buf_size to what the codec needs, so the
+allocation should match it. If the resulting packet exceeds the network
+MTU, IP fragmentation handles it on the transport path; that is separate
+from how much memory the encode target needs.
+
+Applied on top of 2.17, which still carries the clamp unchanged.
+---
+ pjmedia/src/pjmedia/stream_imp_common.c | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/pjmedia/src/pjmedia/stream_imp_common.c b/pjmedia/src/pjmedia/stream_imp_common.c
+index 2dbbd3723..4a9542182 100755
+--- a/pjmedia/src/pjmedia/stream_imp_common.c
++++ b/pjmedia/src/pjmedia/stream_imp_common.c
+@@ -214,12 +214,16 @@ static pj_status_t create_channel( pj_pool_t *pool,
+     /* Also include RTP header size (for sending) */
+     channel->buf_size += sizeof(pjmedia_rtp_hdr);
+ 
+-    if (channel->buf_size > PJMEDIA_MAX_MTU -
+-                                PJMEDIA_STREAM_RESV_PAYLOAD_LEN)
+-    {
+-        channel->buf_size = PJMEDIA_MAX_MTU -
+-                                PJMEDIA_STREAM_RESV_PAYLOAD_LEN;
+-    }
++    /* NOTE: previously this block clamped channel->buf_size down to
++     * PJMEDIA_MAX_MTU - PJMEDIA_STREAM_RESV_PAYLOAD_LEN. That caused a
++     * buffer overrun in the encoder for any codec whose natural frame
++     * size exceeds the MTU (L16/44100 stereo at 10 ms ptime produces
++     * 1764 bytes per frame, larger than the default 1480-byte cap).
++     * `buf_size` as passed in by the caller already reflects the
++     * codec's actual max frame size (see stream.c: pjmedia_stream_create
++     * uses PJ_MAX of receive-side frame_size and codec max-bps-based
++     * estimate), so allocating exactly that much is correct. IP
++     * fragmentation on the send path handles >MTU RTP packets. */
+ 
+     channel->buf = pj_pool_alloc(pool, channel->buf_size);
+     PJ_ASSERT_RETURN(channel->buf != NULL, PJ_ENOMEM);
+-- 
+2.53.0
+

@@ -1,0 +1,44 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2024"
+rust-version = "1.85"
+license = "GPL-2.0-or-later"
+repository = "https://github.com/Donnyp751/Ferrophone"
+publish = false
+
+[workspace.dependencies]
+# Pinned per D-07; bump deliberately.
+pjsua-rust = { git = "https://github.com/Lake-Country-Embedded/pjsua-rust.git", rev = "5164533d3ea1c7d18c3191f017ee1d9d847b1da1" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "signal"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+thiserror = "2"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+clap = { version = "4", features = ["derive"] }
+
+ferro-api = { path = "crates/ferro-api" }
+ferro-engine = { path = "crates/ferro-engine" }
+ferro-core = { path = "crates/ferro-core" }
+ferro-audio = { path = "crates/ferro-audio" }
+ferro-client = { path = "crates/ferro-client" }
+ferro-testkit = { path = "crates/ferro-testkit" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_debug_implementations = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+dbg_macro = "warn"
+todo = "warn"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

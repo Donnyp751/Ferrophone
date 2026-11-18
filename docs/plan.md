@@ -11,7 +11,7 @@ milestone.
 | M0 Foundations | Repo, build, CI and the pjsua-rust gap list in progress | NFR-09, NFR-12, NFR-14 | 1–2 wk |
 | M1 Headless phone | `ferrophoned` + `ferroctl` place and take calls through the API | FR-01–03, 05, 06, 08, 18, 23, 29, 35 | 3–4 wk |
 | M2 Desk phone UI | Tauri app drives the daemon: lines, dial pad, call panel, tray | FR-25, 27, 28, NFR-10, 11 | 3 wk |
-| M3 Desk phone features | Key grid, BLF, MWI, attended transfer | FR-07, 13, 14, 15 | 3 wk |
+| M3 Desk phone features | Key grid, BLF, MWI, attended transfer; FreeSWITCH container | FR-07, 13, 14, 15 | 3 wk |
 | M4 Diagnostics and test hooks | SIP trace viewer, RTP stats, test hooks | FR-33, 34, 38 | 2 wk |
 | M5 Audio hardening, release 0.1 | Device roles, hot-plug, AEC tuning, network resilience, Linux packages | FR-20, 21, NFR-02 (Linux), 03–08 | 2–3 wk |
 | M6 1.0 features | Conference, DND/forward/intercom, park, recording, sidecar, compact view, contacts, provisioning, ICE, D-Bus, HID | all v1.0 FRs | 6–8 wk |
@@ -19,16 +19,20 @@ milestone.
 
 ## M0 Foundations
 
-- [ ] Create the GitHub repo (personal account); push `main`; branch protection; GPL-2.0-or-later `LICENSE`
-- [ ] Cargo workspace with the crate layout from architecture.md §2; `rustfmt`, `clippy -D warnings`, `cargo deny` (licenses per NFR-14)
-- [ ] `scripts/build-pjproject.sh`: pjproject 2.17 + `mtu-clamp-fix` patch + our `config_site.h` → `third_party/prefix`, cached in CI
-- [ ] Depend on `pjsua-rust` at a pinned git revision; a smoke test registers against a local Asterisk
-- [ ] `tests/interop/docker-compose.yml`: Asterisk 22 with 6 test extensions, voicemail and BLF hints; FreeSWITCH 1.10 with presence
-- [ ] Lab tier: `lab` cargo feature, `tests/lab/lab.toml` loader, first lab test registering the 17 reserved extensions (docs/testing.md)
+- [ ] Create the GitHub repo (personal account); push `main`; branch protection
+- [x] GPL-2.0-or-later `LICENSE`
+- [x] Cargo workspace with the crate layout from architecture.md §2; `rustfmt`, `clippy -D warnings`, `cargo deny` (licenses per NFR-14)
+- [x] `scripts/build-pjproject.sh`: pjproject 2.17 + `mtu-clamp-fix` patch + our `config_site.h` → `third_party/prefix`, cached in CI
+- [x] Depend on `pjsua-rust` at a pinned git revision; a smoke test registers against a local Asterisk
+- [x] `tests/interop/docker-compose.yml`: Asterisk 22.11 with 8 test extensions, voicemail and BLF hints
+- [ ] FreeSWITCH 1.10 container with presence: moved to M3 (official images need a SignalWire token; only presence BLF needs it)
+- [x] Lab tier: `lab` cargo feature, `tests/lab/lab.toml` loader, first lab test registering the 17 reserved extensions (docs/testing.md)
 - [ ] Ask the lab owner for BLF hints, voicemail/MWI and pickup on the reserved extensions (testing.md, "What the lab PBX can't test yet")
-- [ ] GitHub Actions: build + unit tests on ubuntu-24.04 (x86_64, aarch64); interop job with compose
+- [x] GitHub Actions: build + unit tests on ubuntu-24.04 (x86_64, aarch64); interop job with compose
 - [ ] Open pjsua-rust issues or PRs for every D-07 gap; start with stream stats and the buddy/dialog-event API
-- [ ] `tracing` setup with per-subsystem levels and the PJSIP log bridge
+- [x] `tracing` setup with per-subsystem levels; PJSIP log bridge (provided by pjsua-rust, target `pjsip`)
+
+**Status (2026-11-17):** locally, the lab test registers and unregisters all 17 reserved extensions (UDP, mTLS, mTLS + SRTP) and the container test passes. Remaining: GitHub repo, a first green CI run, pjsua-rust PRs, the lab-owner request.
 
 **Exit:** a CI run on a clean machine builds everything and a test binary registers to the CI Asterisk; the same binary registers all reserved extensions on the lab PBX.
 
@@ -62,6 +66,7 @@ milestone.
 - [ ] BLF lamps (dialog and presence), directed pickup from a ringing lamp (FR-14)
 - [ ] MWI count + voicemail key (FR-15)
 - [ ] Attended and feature-code transfer flows in the UI (FR-07)
+- [ ] FreeSWITCH 1.10 in `tests/interop` for presence BLF (moved from M0)
 
 **Exit:** a 24-key BLF grid against Asterisk and FreeSWITCH tracks state within 1 s; all of M3's *[CI]* criteria pass.
 

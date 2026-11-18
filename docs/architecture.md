@@ -46,6 +46,7 @@ ferrophone/
 │   ├── ferro-core/             domain logic: accounts, lines, keys, BLF, MWI, history, config
 │   ├── ferro-audio/            device watching, hot-plug, test-hook analysis (FFT, tone, level)
 │   ├── ferro-client/           async Rust client for the API (used by app, ferroctl, tests)
+│   ├── ferro-testkit/          test environment config: lab.toml loader, interop settings
 │   ├── ferrophoned/            daemon binary: API server, service wiring, platform glue
 │   └── ferroctl/               CLI binary
 ├── app/                        Tauri 2 app

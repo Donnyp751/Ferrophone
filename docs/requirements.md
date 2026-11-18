@@ -136,7 +136,7 @@ FR-36 to FR-38 are new in v0.2. IDs are never reused.
 | NFR-05 | Reliability | Survives Wi-Fi to wired, VPN up/down and suspend/resume without a restart: re-registers within 10 s; active calls recover through re-INVITE where the PBX allows. A UI crash does not drop calls. | Scripted network-change test; kill-UI test *[CI]* |
 | NFR-06 | Security | Credentials in the OS keyring (Secret Service, Windows Credential Manager, macOS Keychain), never in the config file. TLS certificate validation on by default. Control socket reachable only by the owning user. | Unit tests; socket permission test |
 | NFR-07 | Privacy | No telemetry; no network traffic except to configured servers and update checks (update checks can be turned off). | Review gate |
-| NFR-08 | Interop | Automated: Asterisk 22 and FreeSWITCH 1.10 in containers; Asterisk 20.6 in the lab (see testing.md). Manual before each release: FreePBX 17, 3CX v20, Kamailio 5.8, two SIP trunk providers. | Interop matrix in the release checklist |
+| NFR-08 | Interop | Automated: Asterisk 22.11 (from M0) and FreeSWITCH 1.10 (from M3) in containers; Asterisk 20.6 in the lab (see testing.md). Manual before each release: FreePBX 17, 3CX v20, Kamailio 5.8, two SIP trunk providers. | Interop matrix in the release checklist |
 | NFR-09 | Testability | Headless core runs in CI against containerized Asterisk and FreeSWITCH plus SIPp scenarios, scripted through the control API. | CI |
 | NFR-10 | UX | Usable with the keyboard only; screen reader labels; light and dark themes following the OS; HiDPI. | Accessibility checklist per release |
 | NFR-11 | Localization | All UI strings translatable from day one (ICU MessageFormat); English first. | Lint rule: no hard-coded UI strings |

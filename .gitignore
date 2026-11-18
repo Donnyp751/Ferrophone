@@ -3,3 +3,4 @@ node_modules/
 /third_party/prefix/
 # Local lab config: holds hosts and credentials. Never commit it.
 /tests/lab/lab.toml
+/third_party/build/
