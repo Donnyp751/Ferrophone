@@ -156,8 +156,13 @@ mobile, embedded or cloud components.
 ## D-10 PJSIP build
 
 **Choice:** `scripts/build-pjproject.sh` builds pjproject at a pinned tag (2.17)
-with our `config_site.h` and patches (`third_party/pjproject/patches/`,
-starting with `mtu-clamp-fix`) into `third_party/prefix/`. `pjsua-rust` finds
+with our `config_site.h` and patches (`third_party/pjproject/patches/`)
+into `third_party/prefix/`. Current patches:
+
+| Patch | Why | Upstream |
+| --- | --- | --- |
+| 0001 stream: don't clamp the media buffer to the MTU | L16 44.1 kHz frames exceed the MTU | from the `mtu-clamp-fix-2.17` fork; not yet submitted |
+| 0002 dlg_event: reset length of absent `<local>`/`<remote>` fields | Without it `pjsua_buddy_get_dlg_event_info()` copies from NULL and crashes on Asterisk's dialog-info NOTIFYs (FR-14) | to report to pjsip/pjproject | `pjsua-rust` finds
 it through `PKG_CONFIG_PATH`. Release builds link PJSIP statically. Opus,
 SRTP and OpenSSL come from the system on Linux packages, and are bundled in the
 Flatpak runtime, AppImage, MSI and DMG.

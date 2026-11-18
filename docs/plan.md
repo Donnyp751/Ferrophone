@@ -19,7 +19,8 @@ milestone.
 
 ## M0 Foundations
 
-- [ ] Create the GitHub repo (personal account); push `main`; branch protection
+- [x] Create the GitHub repo (personal account); push `main`
+- [ ] Branch protection on `main`
 - [x] GPL-2.0-or-later `LICENSE`
 - [x] Cargo workspace with the crate layout from architecture.md §2; `rustfmt`, `clippy -D warnings`, `cargo deny` (licenses per NFR-14)
 - [x] `scripts/build-pjproject.sh`: pjproject 2.17 + `mtu-clamp-fix` patch + our `config_site.h` → `third_party/prefix`, cached in CI
@@ -28,11 +29,17 @@ milestone.
 - [ ] FreeSWITCH 1.10 container with presence: moved to M3 (official images need a SignalWire token; only presence BLF needs it)
 - [x] Lab tier: `lab` cargo feature, `tests/lab/lab.toml` loader, first lab test registering the 17 reserved extensions (docs/testing.md)
 - [ ] Ask the lab owner for BLF hints, voicemail/MWI and pickup on the reserved extensions (testing.md, "What the lab PBX can't test yet")
-- [x] GitHub Actions: build + unit tests on ubuntu-24.04 (x86_64, aarch64); interop job with compose
-- [ ] Open pjsua-rust issues or PRs for every D-07 gap; start with stream stats and the buddy/dialog-event API
+- [x] GitHub Actions: build + unit tests (first run green on x86_64 and arm64) on ubuntu-24.04 (x86_64, aarch64); interop job with compose
+- [ ] Open pjsua-rust issues or PRs for every D-07 gap
+    - [x] Stream stats (`call_audio_stats`): branch `stream-stats`, loopback test passes
+    - [x] Buddy API, presence + dialog event (`add_buddy`): branch `buddy-blf`, BLF test passes against tests/interop Asterisk
+    - [ ] Push both branches and open PRs
+    - [ ] Attended transfer, MWI, audio device list and hot-plug, Call-Info headers
+- [x] PJSIP 2.17 dialog-event crash found while testing BLF; fixed in patch 0002 (D-10)
+- [ ] Report the dlg_event.c bug upstream to pjsip/pjproject
 - [x] `tracing` setup with per-subsystem levels; PJSIP log bridge (provided by pjsua-rust, target `pjsip`)
 
-**Status (2026-11-17):** locally, the lab test registers and unregisters all 17 reserved extensions (UDP, mTLS, mTLS + SRTP) and the container test passes. Remaining: GitHub repo, a first green CI run, pjsua-rust PRs, the lab-owner request.
+**Status (2026-11-17):** locally, the lab test registers and unregisters all 17 reserved extensions (UDP, mTLS, mTLS + SRTP) and the container test passes. GitHub repo and first green CI run done (PR #1). Remaining: pjsua-rust PRs, the lab-owner request.
 
 **Exit:** a CI run on a clean machine builds everything and a test binary registers to the CI Asterisk; the same binary registers all reserved extensions on the lab PBX.
 

@@ -1,0 +1,48 @@
+From: Donald Posterick <donny.p@live.com>
+Subject: [PATCH] dlg_event: reset the length of absent local/remote fields
+
+pjsip_dlg_event_parse_dialog_info2() clears local_identity,
+local_identity_display, local_target_uri and the three remote_* fields
+by setting only .ptr to NULL when a <dialog> has no <local> or <remote>
+element. .slen keeps a stale value, so pjsua_buddy_get_dlg_event_info(),
+which copies every field with slen > 0, calls pj_strncpy() on a NULL
+source and crashes.
+
+Seen with Asterisk 22, whose dialog-info NOTIFYs carry neither element:
+the watcher segfaults in pjsua_buddy_get_dlg_event_info() from
+on_buddy_dlg_event_state once the monitored extension answers a call.
+
+Set .slen to 0 together with .ptr.
+
+diff --git a/pjsip/src/pjsip-simple/dlg_event.c b/pjsip/src/pjsip-simple/dlg_event.c
+index 9b998633e..2be28fa73 100644
+--- a/pjsip/src/pjsip-simple/dlg_event.c
++++ b/pjsip/src/pjsip-simple/dlg_event.c
+@@ -377,9 +377,11 @@ pjsip_dlg_event_parse_dialog_info2(char *body, unsigned body_len,
+                 pjsip_dlg_info_local_get_target_uri(local));
+         } else {
+             dlgev_st->info[dlgev_st->info_cnt].local_identity.ptr = NULL;
+-            dlgev_st->info[dlgev_st->info_cnt].local_identity_display.ptr =
+-                NULL;
++            dlgev_st->info[dlgev_st->info_cnt].local_identity.slen = 0;
++            dlgev_st->info[dlgev_st->info_cnt].local_identity_display.ptr = NULL;
++            dlgev_st->info[dlgev_st->info_cnt].local_identity_display.slen = 0;
+             dlgev_st->info[dlgev_st->info_cnt].local_target_uri.ptr = NULL;
++            dlgev_st->info[dlgev_st->info_cnt].local_target_uri.slen = 0;
+         }
+ 
+         remote = pjsip_dlg_info_dialog_get_remote(dialog);
+@@ -394,9 +396,11 @@ pjsip_dlg_event_parse_dialog_info2(char *body, unsigned body_len,
+                 pjsip_dlg_info_remote_get_target_uri(remote));
+         } else {
+             dlgev_st->info[dlgev_st->info_cnt].remote_identity.ptr = NULL;
+-            dlgev_st->info[dlgev_st->info_cnt].remote_identity_display.ptr =
+-                NULL;
++            dlgev_st->info[dlgev_st->info_cnt].remote_identity.slen = 0;
++            dlgev_st->info[dlgev_st->info_cnt].remote_identity_display.ptr = NULL;
++            dlgev_st->info[dlgev_st->info_cnt].remote_identity_display.slen = 0;
+             dlgev_st->info[dlgev_st->info_cnt].remote_target_uri.ptr = NULL;
++            dlgev_st->info[dlgev_st->info_cnt].remote_target_uri.slen = 0;
+         }
+     } else {
+         dlgev_st->info[dlgev_st->info_cnt].dialog_node = NULL;
