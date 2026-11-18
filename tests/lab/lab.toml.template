@@ -1,0 +1,34 @@
+# Ferrophone lab test config. Copy to tests/lab/lab.toml (gitignored) and fill in.
+# Lab tests run with:  FERROPHONE_LAB=tests/lab/lab.toml cargo test --features lab
+# They run serially: the lab PBX is shared with other test suites.
+
+[servers.primary]
+host = "<pbx ip or name>"
+udp_port = 5060
+tls_port = 5061          # server-auth TLS
+mtls_port = 5062         # mutual TLS (medium and strict tiers)
+
+[servers.alternate]      # for failover tests (FR-02)
+host = "<alternate pbx>"
+udp_port = 5060
+tls_port = 5061
+mtls_port = 5062
+
+[dns]                    # SRV failover tests (FR-02)
+resolver = "<dns ip>"
+srv_domain = "<domain with _sip._udp and _sips._tcp SRV records>"
+nosrv_domain = "<domain with only an A record>"
+
+[tls]
+ca_file = "<path to CA cert>"
+client_cert_file = "<path to client cert, for mutual TLS>"
+client_key_file = "<path to client key>"
+
+# Extensions reserved for Ferrophone. Don't share them with other suites:
+# the PBX uses max_contacts=1 + remove_existing=yes, so a second registration
+# kicks out the first.
+[[extensions]]
+user = "<ext>"
+password = "<secret>"
+server = "primary"
+tier = "open"            # open | medium (mTLS) | strict (mTLS + SRTP)
