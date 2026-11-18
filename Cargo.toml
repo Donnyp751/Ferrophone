@@ -7,7 +7,7 @@ version = "0.0.1"
 edition = "2024"
 rust-version = "1.85"
 license = "GPL-2.0-or-later"
-repository = "https://github.com/Donnyp751/ferrophone"
+repository = "https://github.com/Donnyp751/Ferrophone"
 publish = false
 
 [workspace.dependencies]
